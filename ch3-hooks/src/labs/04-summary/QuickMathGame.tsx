@@ -1,81 +1,58 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 
-const QuickMathGame: React.FC = () => {
-  const [num1, setNum1] = useState<number | null>(null);
-  const [num2, setNum2] = useState<number | null>(null);
-  const [userAnswer, setUserAnswer] = useState("");
-  const [isDisabled, setIsDisabled] = useState(false);
+export default function QuickMathGame() {
+  const [num1, setNum1] = useState(0);
+  const [num2, setNum2] = useState(0);
+  const [answer, setAnswer] = useState("");
   const [result, setResult] = useState("");
-  const timerId = useRef<number | null>(null); // ✅ number로 변경
+  const [disabled, setDisabled] = useState(true);
+  const timerRef = useRef<number | null>(null);
 
-  // 문제 시작
-  const startGame = () => {
-    const a = Math.floor(Math.random() * 90 + 10); // 두 자리 수
-    const b = Math.floor(Math.random() * 90 + 10);
+  const startQuiz = () => {
+    const a = Math.floor(Math.random() * 90) + 10; // 10~99
+    const b = Math.floor(Math.random() * 90) + 10;
     setNum1(a);
     setNum2(b);
-    setUserAnswer("");
-    setIsDisabled(false);
+    setAnswer("");
     setResult("");
+    setDisabled(false);
 
-    // 타이머 설정
-    if (timerId.current) clearTimeout(timerId.current);
-    timerId.current = setTimeout(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => {
       checkAnswer();
     }, 5000);
   };
 
-  // 정답 확인
   const checkAnswer = () => {
-    if (num1 === null || num2 === null) return;
     const correct = num1 * num2;
-    const isCorrect = parseInt(userAnswer, 10) === correct;
+    const isCorrect = parseInt(answer, 10) === correct;
     setResult(
-      `${
-        isCorrect ? "✅ 정답입니다!" : "❌ 오답입니다!"
-      } 정답은 ${num1} × ${num2} = ${correct}입니다.`
+      isCorrect
+        ? `정답! 정답은 ${num1} × ${num2} = ${correct}입니다.`
+        : `오답! 정답은 ${num1} × ${num2} = ${correct}입니다.`
     );
-    setIsDisabled(true);
+    setDisabled(true);
   };
-
-  // 클린업 (언마운트 시 타이머 제거)
-  useEffect(() => {
-    return () => {
-      if (timerId.current) {
-        clearTimeout(timerId.current);
-        console.log("Clean up!");
-      }
-    };
-  }, []);
 
   return (
     <div>
-      <h2> 5초 암산 곱셈 퀴즈</h2>
-      {num1 !== null && num2 !== null ? (
-        <div>
-          <p>
-            문제: {num1} × {num2} = ?
-          </p>
-          <input
-            type="number"
-            value={userAnswer}
-            onChange={(e) => setUserAnswer(e.target.value)}
-            disabled={isDisabled}
-          />
-        </div>
+      {result ? (
+        <p>{result}</p>
       ) : (
-        <p>시작 버튼을 눌러주세요</p>
+        <p>
+          {num1} × {num2} = ?
+        </p>
       )}
-      <div style={{ marginTop: "10px" }}>
-        <button onClick={startGame}>시작 / 다시 시작</button>
-      </div>
-      {result && (
-        <div style={{ marginTop: "15px" }}>
-          <strong>{result}</strong>
-        </div>
-      )}
+      <input
+        type="number"
+        value={answer}
+        disabled={disabled}
+        onChange={(e) => setAnswer(e.target.value)}
+      />
+      <button onClick={checkAnswer} disabled={disabled}>
+        정답 제출
+      </button>
+      <button onClick={startQuiz}>시작</button>
     </div>
   );
-};
-
-export default QuickMathGame;
+}

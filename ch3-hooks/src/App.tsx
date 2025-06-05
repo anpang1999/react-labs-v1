@@ -1,7 +1,8 @@
 import "./App.css";
+import QuickMathGame from "./labs/04-summary/QuickMathGame";
 
 function App() {
-  return <></>;
+  return <QuickMathGame />;
 }
 
 export default App;
